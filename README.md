@@ -22,31 +22,37 @@ Convert BS to AD
 rlibrary(nepalidate)
 ```
 # Convert BS date to AD
+```r
 bs_to_ad("2080-05-15")
 #> [1] "2023-09-01"
-
+```
 # Also works with slash format
+```r
 bs_to_ad("2080/05/15")
 #> [1] "2023-09-01"
-
-Convert AD to BS
-r# Convert AD date to BS
+```
+# Convert AD to BS
+```r
+# Convert AD date to BS
 ad_to_bs("2023-09-01")
 #> [1] "2080-05-15"
-
+```
 # Works with Date objects too
+```r
 ad_to_bs(Sys.Date())
 #> [1] "2081-09-06"  # (example output)
-
-Get Nepali Month Names
-r# Get month name in English
+```
+#Get Nepali Month Names
+```r
 get_nepali_month_name(1)
 #> [1] "Baishakh"
-
+```
 # Get month name in Nepali
+```r
 get_nepali_month_name(1, "ne")
 #> [1] "बैशाख"
-Date Range Support
+```
+# Date Range Support
 
 BS dates: 1970-01-01 to 2099-12-30
 AD dates: 1913-04-13 to 2043-04-13
