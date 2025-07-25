@@ -1,0 +1,53 @@
+
+url: https://ser1c.github.io/nepalidate/
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+  theme: arrow-light
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, tutorials, news]
+    right: [search, github]
+
+home:
+  title: Convert between Bikram Sambat (BS) and Gregorian (AD) dates
+  description: |
+    The nepalidate package provides simple and efficient functions to convert 
+    dates between the Nepali Bikram Sambat (BS) calendar and the Gregorian 
+    (AD) calendar system.
+
+authors:
+  Your Name:
+    href: https://github.com/ser1c
+
+reference:
+- title: "Date Conversion Functions"
+  desc: "Functions to convert between BS and AD dates"
+  contents:
+  - bs_to_ad
+  - ad_to_bs
+  
+- title: "Utility Functions"
+  desc: "Helper functions for working with Nepali dates"
+  contents:
+  - get_nepali_month_name
+  
+- title: "Package Data"
+  desc: "Internal calendar data"
+  contents:
+  - calendar_data
+
+articles:
+- title: "Getting Started"
+  contents:
+  - introduction
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with
+
+development:
+  mode: auto
