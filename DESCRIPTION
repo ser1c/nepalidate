@@ -1,11 +1,22 @@
 Package: nepalidate
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Type: Package
+Title: Convert Between Bikram Sambat (BS) and Anno Domini (AD) Dates
+Version: 0.1.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Sabin", "Subedi", , "contact@sabinsubedi.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Provides functions to convert dates between the Nepali Bikram Sambat (BS) 
+    calendar and the Gregorian (AD) calendar. The package supports BS years from 1970 
+    to 2099 and includes validation for date ranges and formats.
+License: MIT + file LICENSE
 Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+LazyData: true
+RoxygenNote: 7.2.3
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+URL: https://github.com/ser1c/nepalidate
+BugReports: https://github.com/ser1c/nepalidate/issues
