@@ -1,16 +1,34 @@
+# Updated R/converters.R with vectorized functions
+
 #' Convert Bikram Sambat (BS) date to Anno Domini (AD) date
 #'
-#' @param bs_date A character string representing a BS date in "YYYY-MM-DD" or "YYYY/MM/DD" format
+#' @param bs_date A character string or vector of strings representing BS dates in "YYYY-MM-DD" or "YYYY/MM/DD" format
 #'
-#' @return A character string representing the equivalent AD date in "YYYY-MM-DD" format
+#' @return A character string or vector of strings representing the equivalent AD dates in "YYYY-MM-DD" format
 #' @export
 #'
 #' @examples
 #' bs_to_ad("2080-05-15")
 #' bs_to_ad("2080/05/15")
+#' bs_to_ad(c("2080-05-15", "2080-06-20"))
 #'
 #' @seealso \code{\link{ad_to_bs}} for converting AD to BS dates
 bs_to_ad <- function(bs_date) {
+  # Handle single or multiple dates
+  if (length(bs_date) > 1) {
+    return(vapply(bs_date, bs_to_ad_single, character(1), USE.NAMES = FALSE))
+  } else {
+    return(bs_to_ad_single(bs_date))
+  }
+}
+
+# Internal function to handle single BS to AD conversion
+bs_to_ad_single <- function(bs_date) {
+  # Handle NA values
+  if (is.na(bs_date)) {
+    return(NA_character_)
+  }
+  
   # Handle different date formats
   bs_date <- gsub("/", "-", bs_date)
   date_parts <- as.numeric(strsplit(bs_date, "-")[[1]])
@@ -26,11 +44,11 @@ bs_to_ad <- function(bs_date) {
 
   # Validate date range
   if (year < 1970 || year > 2099) {
-    stop("Year must be between 1970 and 2099")
+    stop(paste("Year must be between 1970 and 2099. Got:", year))
   }
 
   if (month < 1 || month > 12) {
-    stop("Month must be between 1 and 12")
+    stop(paste("Month must be between 1 and 12. Got:", month))
   }
 
   year_str <- as.character(year)
@@ -39,7 +57,7 @@ bs_to_ad <- function(bs_date) {
   }
 
   if (day < 1 || day > nepalidate::calendar_data[[year_str]][month]) {
-    stop("Invalid day for the given month")
+    stop(paste("Invalid day", day, "for month", month, "in year", year))
   }
 
   # Calculate day difference from reference date (BS 2026-09-18)
@@ -75,19 +93,38 @@ bs_to_ad <- function(bs_date) {
 
 #' Convert Anno Domini (AD) date to Bikram Sambat (BS) date
 #'
-#' @param ad_date A character string representing an AD date in "YYYY-MM-DD" or "YYYY/MM/DD" format,
-#'   or a Date object
+#' @param ad_date A character string, Date object, or vector representing AD dates in "YYYY-MM-DD" or "YYYY/MM/DD" format
 #'
-#' @return A character string representing the equivalent BS date in "YYYY-MM-DD" format
+#' @return A character string or vector of strings representing the equivalent BS dates in "YYYY-MM-DD" format
 #' @export
 #'
 #' @examples
 #' ad_to_bs("2023-09-01")
 #' ad_to_bs("2023/09/01")
 #' ad_to_bs(Sys.Date())
+#' ad_to_bs(c("2023-09-01", "2023-10-15"))
+#' 
+#' # Works with data frames
+#' df <- data.frame(date = as.Date(c("2023-01-01", "2023-06-15", "2023-12-31")))
+#' df$bs_date <- ad_to_bs(df$date)
 #'
 #' @seealso \code{\link{bs_to_ad}} for converting BS to AD dates
 ad_to_bs <- function(ad_date) {
+  # Handle single or multiple dates
+  if (length(ad_date) > 1) {
+    return(vapply(ad_date, ad_to_bs_single, character(1), USE.NAMES = FALSE))
+  } else {
+    return(ad_to_bs_single(ad_date))
+  }
+}
+
+# Internal function to handle single AD to BS conversion
+ad_to_bs_single <- function(ad_date) {
+  # Handle NA values
+  if (is.na(ad_date)) {
+    return(NA_character_)
+  }
+  
   # Handle Date objects
   if (inherits(ad_date, "Date")) {
     ad_date <- format(ad_date, "%Y-%m-%d")
@@ -104,7 +141,7 @@ ad_to_bs <- function(ad_date) {
   max_date <- as.Date("2043-04-13")
 
   if (ad_date_obj < min_date || ad_date_obj > max_date) {
-    stop("Date must be between 1913-04-13 and 2043-04-13")
+    stop(paste("Date must be between 1913-04-13 and 2043-04-13. Got:", ad_date))
   }
 
   # Calculate days from reference date

@@ -19,5 +19,5 @@ Get Nepali month name
 }
 \examples{
 get_nepali_month_name(1)  # "Baishakh"
-get_nepali_month_name(1, "ne")  # "बैशाख"
+get_nepali_month_name(1, "ne")  # "\u092c\u0948\u0936\u093e\u0916"
 }

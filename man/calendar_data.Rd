@@ -7,8 +7,8 @@
 \format{
 A named list with 130 elements (years 1970-2099), each containing:
 \describe{
-\item{1-12}{Number of days in each month}
-\item{13}{Total number of days in the year}
+  \item{1-12}{Number of days in each month}
+  \item{13}{Total number of days in the year}
 }
 }
 \source{

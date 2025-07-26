@@ -60,7 +60,7 @@ find_bs_date_from_days <- function(year, days) {
 #'
 #' @examples
 #' get_nepali_month_name(1)  # "Baishakh"
-#' get_nepali_month_name(1, "ne")  # "बैशाख"
+#' get_nepali_month_name(1, "ne")  # "\u092c\u0948\u0936\u093e\u0916"
 get_nepali_month_name <- function(month_number, lang = "en") {
   if (month_number < 1 || month_number > 12) {
     stop("Month number must be between 1 and 12")
@@ -70,9 +70,18 @@ get_nepali_month_name <- function(month_number, lang = "en") {
                  "Bhadra", "Ashwin", "Kartik", "Mangsir",
                  "Poush", "Magh", "Falgun", "Chaitra")
 
-  months_ne <- c("बैशाख", "जेठ", "असार", "साउन",
-                 "भदौ", "असोज", "कार्तिक", "मंसिर",
-                 "पुष", "माघ", "फागुन", "चैत")
+  months_ne <- c("\u092c\u0948\u0936\u093e\u0916",  # बैशाख
+                 "\u091c\u0947\u0920",              # जेठ
+                 "\u0905\u0938\u093e\u0930",        # असार
+                 "\u0938\u093e\u0913\u0928",        # साउन
+                 "\u092d\u0926\u094c",              # भदौ
+                 "\u0905\u0938\u094b\u091c",        # असोज
+                 "\u0915\u093e\u0930\u094d\u0924\u093f\u0915",  # कार्तिक
+                 "\u092e\u0902\u0938\u093f\u0930",  # मंसिर
+                 "\u092a\u0941\u0937",              # पुष
+                 "\u092e\u093e\u0918",              # माघ
+                 "\u092b\u093e\u0917\u0941\u0928",  # फागुन
+                 "\u091a\u0948\u0924")              # चैत
 
   if (lang == "ne") {
     return(months_ne[month_number])
@@ -80,3 +89,4 @@ get_nepali_month_name <- function(month_number, lang = "en") {
     return(months_en[month_number])
   }
 }
+

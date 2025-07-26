@@ -7,11 +7,10 @@
 ad_to_bs(ad_date)
 }
 \arguments{
-\item{ad_date}{A character string representing an AD date in "YYYY-MM-DD" or "YYYY/MM/DD" format,
-or a Date object}
+\item{ad_date}{A character string, Date object, or vector representing AD dates in "YYYY-MM-DD" or "YYYY/MM/DD" format}
 }
 \value{
-A character string representing the equivalent BS date in "YYYY-MM-DD" format
+A character string or vector of strings representing the equivalent BS dates in "YYYY-MM-DD" format
 }
 \description{
 Convert Anno Domini (AD) date to Bikram Sambat (BS) date
@@ -20,6 +19,11 @@ Convert Anno Domini (AD) date to Bikram Sambat (BS) date
 ad_to_bs("2023-09-01")
 ad_to_bs("2023/09/01")
 ad_to_bs(Sys.Date())
+ad_to_bs(c("2023-09-01", "2023-10-15"))
+
+# Works with data frames
+df <- data.frame(date = as.Date(c("2023-01-01", "2023-06-15", "2023-12-31")))
+df$bs_date <- ad_to_bs(df$date)
 
 }
 \seealso{
