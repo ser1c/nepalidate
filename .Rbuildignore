@@ -4,3 +4,4 @@
 ^\.github$
 ^_pkgdown\.yml$
 ^news\.md$
+^cran-comments\.md$
