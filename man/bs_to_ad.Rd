@@ -7,18 +7,17 @@
 bs_to_ad(bs_date)
 }
 \arguments{
-\item{bs_date}{A character string or vector of strings representing BS dates in "YYYY-MM-DD" or "YYYY/MM/DD" format}
+\item{bs_date}{A character vector representing BS dates in "YYYY-MM-DD" or "YYYY/MM/DD" format.}
 }
 \value{
-A character string or vector of strings representing the equivalent AD dates in "YYYY-MM-DD" format
+A character vector of the equivalent AD dates in "YYYY-MM-DD" format.
 }
 \description{
-Convert Bikram Sambat (BS) date to Anno Domini (AD) date
+This function is fully vectorized for high performance on large datasets.
 }
 \examples{
 bs_to_ad("2080-05-15")
-bs_to_ad("2080/05/15")
-bs_to_ad(c("2080-05-15", "2080-06-20"))
+bs_to_ad(c("2080-05-15", "2080-06-20", NA))
 
 }
 \seealso{

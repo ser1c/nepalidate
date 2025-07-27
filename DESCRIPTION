@@ -1,7 +1,7 @@
 Package: nepalidate
 Type: Package
 Title: Convert Between Bikram Sambat (BS) and Anno Domini (AD) Dates
-Version: 0.2.0
+Version: 1.0.0
 Authors@R: 
     person("Sabin", "Subedi", , "contact@sabinsubedi.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))

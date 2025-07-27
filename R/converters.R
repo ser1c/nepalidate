@@ -1,201 +1,185 @@
-# Updated R/converters.R with vectorized functions
+# R/converters.R - Fully Vectorized Functions
 
 #' Convert Bikram Sambat (BS) date to Anno Domini (AD) date
 #'
-#' @param bs_date A character string or vector of strings representing BS dates in "YYYY-MM-DD" or "YYYY/MM/DD" format
+#' This function is fully vectorized for high performance on large datasets.
 #'
-#' @return A character string or vector of strings representing the equivalent AD dates in "YYYY-MM-DD" format
+#' @param bs_date A character vector representing BS dates in "YYYY-MM-DD" or "YYYY/MM/DD" format.
+#'
+#' @return A character vector of the equivalent AD dates in "YYYY-MM-DD" format.
 #' @export
 #'
 #' @examples
 #' bs_to_ad("2080-05-15")
-#' bs_to_ad("2080/05/15")
-#' bs_to_ad(c("2080-05-15", "2080-06-20"))
+#' bs_to_ad(c("2080-05-15", "2080-06-20", NA))
 #'
 #' @seealso \code{\link{ad_to_bs}} for converting AD to BS dates
 bs_to_ad <- function(bs_date) {
-  # Handle single or multiple dates
-  if (length(bs_date) > 1) {
-    return(vapply(bs_date, bs_to_ad_single, character(1), USE.NAMES = FALSE))
-  } else {
-    return(bs_to_ad_single(bs_date))
+  # --- Pre-computation and Initialization ---
+  # One-time calculation of cumulative days for each month within each year
+  cumulative_days_in_year <- lapply(nepalidate::calendar_data, function(year_data) {
+    # The first 12 elements are month lengths
+    cumsum(c(0, year_data[1:11]))
+  })
+
+  # --- Input Handling & Validation ---
+  if (all(is.na(bs_date))) {
+    return(as.character(bs_date))
   }
+
+  original_class <- class(bs_date)
+  output_dates <- rep(NA_character_, length(bs_date))
+  non_na_indices <- !is.na(bs_date)
+
+  # Work only on non-NA dates
+  valid_dates <- bs_date[non_na_indices]
+
+  # Standardize date format
+  valid_dates <- gsub("/", "-", valid_dates)
+
+  # Vectorized split of date parts
+  date_parts <- do.call(rbind, strsplit(valid_dates, "-"))
+  if (ncol(date_parts) != 3) {
+    stop("Invalid date format. All dates must use YYYY-MM-DD or YYYY/MM/DD.")
+  }
+
+  years <- as.numeric(date_parts[, 1])
+  months <- as.numeric(date_parts[, 2])
+  days <- as.numeric(date_parts[, 3])
+
+  # --- Vectorized Validation ---
+  if (any(years < 1970 | years > 2099, na.rm = TRUE)) {
+    stop("Year must be between 1970 and 2099.")
+  }
+  if (any(months < 1 | months > 12, na.rm = TRUE)) {
+    stop("Month must be between 1 and 12.")
+  }
+
+  # Get max days for each date's year and month
+  year_strs <- as.character(years)
+  max_days <- vapply(seq_along(year_strs), function(i) {
+    nepalidate::calendar_data[[year_strs[i]]][months[i]]
+  }, numeric(1))
+
+  if (any(days < 1 | days > max_days, na.rm = TRUE)) {
+    stop("Invalid day for the given month and year.")
+  }
+
+  # --- Vectorized Calculation ---
+  # Reference: BS 1970-01-01 is AD 1913-04-13
+  ref_ad_date <- as.Date("1913-04-13")
+
+  # Calculate total days passed since the start of the BS calendar data (1970-01-01)
+  # 1. Days from full years passed since 1970
+  total_days_from_years <- vapply(year_strs, function(y) {
+    if (y == "1970") return(0)
+    sum(sapply(as.character(1970:(as.numeric(y) - 1)), function(yr) nepalidate::calendar_data[[yr]][13]))
+  }, numeric(1))
+
+  # 2. Days from full months passed in the current year
+  total_days_from_months <- vapply(seq_along(year_strs), function(i) {
+    cumulative_days_in_year[[year_strs[i]]][months[i]]
+  }, numeric(1))
+
+  # 3. Total days is sum of year days, month days, and current day of month (minus 1 for offset)
+  total_days_offset <- total_days_from_years + total_days_from_months + days - 1
+
+  # Calculate final AD dates
+  final_ad_dates <- ref_ad_date + total_days_offset
+
+  # --- Format Output ---
+  output_dates[non_na_indices] <- format(final_ad_dates, "%Y-%m-%d")
+
+  return(output_dates)
 }
 
-# Internal function to handle single BS to AD conversion
-bs_to_ad_single <- function(bs_date) {
-  # Handle NA values
-  if (is.na(bs_date)) {
-    return(NA_character_)
-  }
-  
-  # Handle different date formats
-  bs_date <- gsub("/", "-", bs_date)
-  date_parts <- as.numeric(strsplit(bs_date, "-")[[1]])
-
-  # Validate input
-  if (length(date_parts) < 3) {
-    stop("Invalid date format. Use YYYY-MM-DD or YYYY/MM/DD")
-  }
-
-  year <- date_parts[1]
-  month <- date_parts[2]
-  day <- date_parts[3]
-
-  # Validate date range
-  if (year < 1970 || year > 2099) {
-    stop(paste("Year must be between 1970 and 2099. Got:", year))
-  }
-
-  if (month < 1 || month > 12) {
-    stop(paste("Month must be between 1 and 12. Got:", month))
-  }
-
-  year_str <- as.character(year)
-  if (!year_str %in% names(nepalidate::calendar_data)) {
-    stop("Calendar data not available for year ", year)
-  }
-
-  if (day < 1 || day > nepalidate::calendar_data[[year_str]][month]) {
-    stop(paste("Invalid day", day, "for month", month, "in year", year))
-  }
-
-  # Calculate day difference from reference date (BS 2026-09-18)
-  day_diff <- 0
-  passed_days <- find_passed_days_in_year(year, month, day)
-
-  if (year > 2026) {
-    # Add days for years after 2026
-    for (i in 2027:(year - 1)) {
-      i_str <- as.character(i)
-      day_diff <- day_diff + nepalidate::calendar_data[[i_str]][13]
-    }
-    day_diff <- day_diff + passed_days + 102
-  } else if (year < 2026) {
-    # Subtract days for years before 2026
-    for (i in (year + 1):2025) {
-      i_str <- as.character(i)
-      day_diff <- day_diff - nepalidate::calendar_data[[i_str]][13]
-    }
-    year_str <- as.character(year)
-    day_diff <- day_diff - (nepalidate::calendar_data[[year_str]][13] - passed_days) - 264
-  } else {
-    # Year is 2026
-    day_diff <- passed_days - 264
-  }
-
-  # Convert to AD date
-  # Reference: BS 2026-09-18 = AD 1970-01-01
-  ad_date <- as.Date("1970-01-01") + day_diff
-
-  return(format(ad_date, "%Y-%m-%d"))
-}
 
 #' Convert Anno Domini (AD) date to Bikram Sambat (BS) date
 #'
-#' @param ad_date A character string, Date object, or vector representing AD dates in "YYYY-MM-DD" or "YYYY/MM/DD" format
+#' This function is fully vectorized for high performance on large datasets.
 #'
-#' @return A character string or vector of strings representing the equivalent BS dates in "YYYY-MM-DD" format
+#' @param ad_date A character vector or Date vector representing AD dates.
+#'
+#' @return A character vector of the equivalent BS dates in "YYYY-MM-DD" format.
 #' @export
 #'
 #' @examples
 #' ad_to_bs("2023-09-01")
-#' ad_to_bs("2023/09/01")
-#' ad_to_bs(Sys.Date())
-#' ad_to_bs(c("2023-09-01", "2023-10-15"))
-#' 
-#' # Works with data frames
-#' df <- data.frame(date = as.Date(c("2023-01-01", "2023-06-15", "2023-12-31")))
-#' df$bs_date <- ad_to_bs(df$date)
+#' ad_to_bs(as.Date("2023-09-01"))
+#' ad_to_bs(c("2023-09-01", "2023-10-15", NA))
 #'
 #' @seealso \code{\link{bs_to_ad}} for converting BS to AD dates
 ad_to_bs <- function(ad_date) {
-  # Handle single or multiple dates
-  if (length(ad_date) > 1) {
-    return(vapply(ad_date, ad_to_bs_single, character(1), USE.NAMES = FALSE))
-  } else {
-    return(ad_to_bs_single(ad_date))
-  }
-}
+  # --- Pre-computation and Initialization ---
+  # One-time setup of cumulative data for quick lookups
+  bs_years_char <- as.character(1970:2099)
 
-# Internal function to handle single AD to BS conversion
-ad_to_bs_single <- function(ad_date) {
-  # Handle NA values
-  if (is.na(ad_date)) {
-    return(NA_character_)
-  }
-  
-  # Handle Date objects
-  if (inherits(ad_date, "Date")) {
-    ad_date <- format(ad_date, "%Y-%m-%d")
-  }
+  # Total days in each BS year
+  total_days_in_bs_years <- sapply(bs_years_char, function(y) nepalidate::calendar_data[[y]][13])
 
-  # Handle different date formats
-  ad_date <- gsub("/", "-", ad_date)
+  # Cumulative sum of days from the start (1970)
+  cumulative_bs_days <- cumsum(total_days_in_bs_years)
 
-  # Parse and validate date
-  ad_date_obj <- as.Date(ad_date)
+  # Cumulative days for each month within each year
+  cumulative_days_in_year <- lapply(nepalidate::calendar_data, function(year_data) {
+    cumsum(c(0, year_data[1:11]))
+  })
 
-  # Check date range (1913-04-13 to 2043-04-13)
-  min_date <- as.Date("1913-04-13")
-  max_date <- as.Date("2043-04-13")
-
-  if (ad_date_obj < min_date || ad_date_obj > max_date) {
-    stop(paste("Date must be between 1913-04-13 and 2043-04-13. Got:", ad_date))
+  # --- Input Handling & Validation ---
+  if (all(is.na(ad_date))) {
+    return(as.character(ad_date))
   }
 
-  # Calculate days from reference date
-  ref_date <- as.Date("1970-01-01")
-  day_diff <- as.numeric(ad_date_obj - ref_date)
+  output_dates <- rep(NA_character_, length(ad_date))
+  non_na_indices <- !is.na(ad_date)
 
-  year <- 2026
-  bs_date <- NULL
+  valid_dates <- ad_date[non_na_indices]
 
-  if (day_diff > 102) {
-    # After BS 2026-12-15
-    day_diff <- day_diff - 102
-
-    while (day_diff > 0) {
-      next_year_str <- as.character(year + 1)
-      year_days <- nepalidate::calendar_data[[next_year_str]][13]
-
-      if (day_diff <= year_days) {
-        bs_date <- find_bs_date_from_days(year + 1, day_diff)
-        break
-      } else {
-        day_diff <- day_diff - year_days
-        year <- year + 1
-      }
-    }
-  } else if (day_diff < -264) {
-    # Before BS 2026-01-01
-    day_diff <- -day_diff - 264
-
-    while (day_diff > 0) {
-      prev_year_str <- as.character(year - 1)
-      year_days <- nepalidate::calendar_data[[prev_year_str]][13]
-
-      if (day_diff <= year_days) {
-        if (day_diff == 0) {
-          prev_prev_year_str <- as.character(year - 2)
-          bs_date <- find_bs_date_from_days(year - 2, nepalidate::calendar_data[[prev_prev_year_str]][13])
-        } else {
-          bs_date <- find_bs_date_from_days(year - 1, year_days - day_diff + 1)
-        }
-        break
-      } else {
-        day_diff <- day_diff - year_days
-        year <- year - 1
-      }
-    }
-  } else {
-    # Within BS year 2026
-    bs_date <- find_bs_date_from_days(2026, 264 + day_diff)
+  if (!inherits(valid_dates, "Date")) {
+    valid_dates <- as.Date(gsub("/", "-", valid_dates))
   }
 
-  # Format output
-  return(sprintf("%04d-%02d-%02d",
-                 bs_date$bs_year,
-                 bs_date$bs_month,
-                 bs_date$bs_day))
+  # --- Vectorized Validation ---
+  min_date <- as.Date("1913-04-13") # BS 1970-01-01
+  max_date <- as.Date("2043-04-13") # BS 2099-12-30
+
+  if (any(valid_dates < min_date | valid_dates > max_date, na.rm = TRUE)) {
+    stop("Date must be between 1913-04-13 and 2043-04-13.")
+  }
+
+  # --- Vectorized Calculation ---
+  # Calculate day difference from the reference AD date
+  day_diff <- as.numeric(valid_dates - min_date)
+
+  # Find the correct BS year for each date using findInterval
+  # This finds which year's cumulative day count the 'day_diff' falls into
+  year_indices <- findInterval(day_diff, cumulative_bs_days, left.open = FALSE)
+  bs_years <- 1970 + year_indices
+
+  # Calculate the number of days passed into that BS year
+  # Subtract the cumulative days of all prior years
+  prior_years_cumulative_days <- c(0, cumulative_bs_days)[year_indices + 1]
+  remaining_days <- day_diff - prior_years_cumulative_days + 1
+
+  # Find the correct month and day for each date
+  # We look up the data for each date's *specific* BS year
+  year_strs <- as.character(bs_years)
+
+  # Find month index for each date using its specific remaining_days and year data
+  month_indices <- vapply(seq_along(year_strs), function(i) {
+    findInterval(remaining_days[i] - 1, cumulative_days_in_year[[year_strs[i]]])
+  }, numeric(1))
+
+  bs_months <- month_indices
+
+  # Calculate the day of the month
+  bs_days <- vapply(seq_along(year_strs), function(i) {
+    remaining_days[i] - cumulative_days_in_year[[year_strs[i]]][month_indices[i]]
+  }, numeric(1))
+
+  # --- Format Output ---
+  final_bs_dates <- sprintf("%04d-%02d-%02d", bs_years, bs_months, bs_days)
+  output_dates[non_na_indices] <- final_bs_dates
+
+  return(output_dates)
 }

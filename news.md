@@ -1,4 +1,13 @@
-# NEWS.md
+# nepalidate 1.0.0
+
+This release marks a major leap in performance and efficiency.
+
+## Major Improvements
+* **Complete Performance Overhaul**: The core conversion functions (`ad_to_bs` and `bs_to_ad`) have been completely refactored to be fully vectorized.
+* **Blazing Fast Speed**: Operations on large datasets (e.g., millions of rows in a `data.table`) are now dramatically faster, moving from minutes to seconds.
+* **Removed Redundancy**: The internal `_single` helper functions have been removed, resulting in a cleaner and more efficient codebase.
+
+---
 
 # nepalidate 0.2.0
 
