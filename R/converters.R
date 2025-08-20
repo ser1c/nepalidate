@@ -16,6 +16,15 @@
 #' @seealso \code{\link{ad_to_bs}} for converting AD to BS dates
 bs_to_ad <- function(bs_date) {
   # --- Pre-computation and Initialization ---
+  # One-time setup of cumulative data for quick lookups
+  bs_years_char <- as.character(1970:2099)
+  
+  # Total days in each BS year
+  total_days_in_bs_years <- sapply(bs_years_char, function(y) nepalidate::calendar_data[[y]][13])
+  
+  # Cumulative sum of days from the start (1970) - this replaces the slow nested loops
+  cumulative_bs_days <- cumsum(total_days_in_bs_years)
+  
   # One-time calculation of cumulative days for each month within each year
   cumulative_days_in_year <- lapply(nepalidate::calendar_data, function(year_data) {
     # The first 12 elements are month lengths
@@ -70,11 +79,9 @@ bs_to_ad <- function(bs_date) {
   ref_ad_date <- as.Date("1913-04-13")
 
   # Calculate total days passed since the start of the BS calendar data (1970-01-01)
-  # 1. Days from full years passed since 1970
-  total_days_from_years <- vapply(year_strs, function(y) {
-    if (y == "1970") return(0)
-    sum(sapply(as.character(1970:(as.numeric(y) - 1)), function(yr) nepalidate::calendar_data[[yr]][13]))
-  }, numeric(1))
+  # 1. Days from full years passed since 1970 (using pre-computed cumulative data)
+  year_indices <- years - 1970
+  total_days_from_years <- ifelse(year_indices == 0, 0, cumulative_bs_days[year_indices])
 
   # 2. Days from full months passed in the current year
   total_days_from_months <- vapply(seq_along(year_strs), function(i) {
