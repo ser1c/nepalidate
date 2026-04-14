@@ -28,12 +28,21 @@ reference:
   contents:
   - bs_to_ad
   - ad_to_bs
-  
+
+- title: "BS Date Class"
+  desc: "S3 class for Bikram Sambat dates"
+  contents:
+  - bs_date
+  - is.bs_date
+  - format.bs_date
+  - as.Date.bs_date
+  - Ops.bs_date
+
 - title: "Utility Functions"
   desc: "Helper functions for working with Nepali dates"
   contents:
   - get_nepali_month_name
-  
+
 - title: "Package Data"
   desc: "Internal calendar data"
   contents:

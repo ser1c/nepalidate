@@ -1,3 +1,23 @@
+# nepalidate 1.1.0
+
+## New features
+* **`bs_date` S3 class**: `ad_to_bs()` now returns a `bs_date` object with `print()`, `format()`, `as.Date()`, arithmetic (`+`, `-`), comparison (`<`, `==`, etc.), and subsetting methods.
+* **`bs_to_ad()` returns `Date`**: Now returns a proper `Date` vector instead of character, enabling direct date arithmetic.
+* **`POSIXct` support**: `ad_to_bs()` now accepts `POSIXct` input in addition to `Date` and character.
+* **Vectorized `get_nepali_month_name()`**: Now accepts integer vectors, not just scalars.
+* **`format.bs_date()`**: Format BS dates with tokens like `%Y`, `%m`, `%d`, `%B` (month name), `%b` (abbreviated).
+
+## Improvements
+* **Cached pre-computation**: Calendar lookup tables are computed once at package load, not on every function call. Significant speedup for repeated conversions.
+* **Informative error messages**: Validation errors now report which position(s) and value(s) are invalid.
+* **Removed dead code**: Internal helper functions `find_passed_days_in_year()` and `find_bs_date_from_days()` removed (unused since v1.0.0).
+
+## Documentation
+* Added introductory vignette (`vignette("introduction")`)
+* Improved `@source` documentation for `calendar_data`
+
+---
+
 # nepalidate 1.0.0
 
 This release marks a major leap in performance and efficiency.
