@@ -7,12 +7,14 @@
 ad_to_bs(ad_date)
 }
 \arguments{
-\item{ad_date}{A character vector or Date vector representing AD dates.}
+\item{ad_date}{A character vector, \code{Date} vector, or \code{POSIXct}
+vector representing AD dates. \code{NA} values are preserved.}
 }
 \value{
-A character vector of the equivalent BS dates in "YYYY-MM-DD" format.
+A \code{\link{bs_date}} object of the equivalent BS dates.
 }
 \description{
+Converts one or more Gregorian (AD) dates to their BS equivalents.
 This function is fully vectorized for high performance on large datasets.
 }
 \examples{

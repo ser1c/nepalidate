@@ -7,17 +7,20 @@
 get_nepali_month_name(month_number, lang = "en")
 }
 \arguments{
-\item{month_number}{Numeric month (1-12)}
+\item{month_number}{An integer vector of month numbers (1-12).}
 
-\item{lang}{Language for month name ("en" for English, "ne" for Nepali)}
+\item{lang}{Language for month names: \code{"en"} for English (default),
+\code{"ne"} for Nepali (Devanagari).}
 }
 \value{
-Character string with month name
+A character vector of month names.
 }
 \description{
-Get Nepali month name
+Returns the name of a Nepali (Bikram Sambat) month in English or Nepali.
+Fully vectorized.
 }
 \examples{
-get_nepali_month_name(1)  # "Baishakh"
-get_nepali_month_name(1, "ne")  # "\u092c\u0948\u0936\u093e\u0916"
+get_nepali_month_name(1)
+get_nepali_month_name(1, "ne")
+get_nepali_month_name(c(1, 4, 12))
 }

@@ -70,9 +70,9 @@ test_that("ad_to_bs works correctly", {
     "2080-05-15"
   )
 
-  # POSIXct input
+  # POSIXct input (use UTC to avoid timezone-related day shift)
   expect_equal(
-    unclass(ad_to_bs(as.POSIXct("2023-09-01"))),
+    unclass(ad_to_bs(as.POSIXct("2023-09-01", tz = "UTC"))),
     "2080-05-15"
   )
 })

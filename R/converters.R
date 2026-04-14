@@ -73,7 +73,7 @@ bs_to_ad <- function(bs_date) {
   }
 
   # --- Vectorized Calculation ---
-  # Reference: BS 1970-01-01 = AD 1913-04-13
+  .ensure_cache()
   ref_ad_date <- as.Date("1913-04-13")
   cumulative_bs_days <- .pkg_cache$cumulative_bs_days
   cumulative_days_in_year <- .pkg_cache$cumulative_days_in_year
@@ -144,6 +144,7 @@ ad_to_bs <- function(ad_date) {
   }
 
   # --- Vectorized Calculation ---
+  .ensure_cache()
   cumulative_bs_days <- .pkg_cache$cumulative_bs_days
   cumulative_days_in_year <- .pkg_cache$cumulative_days_in_year
 
